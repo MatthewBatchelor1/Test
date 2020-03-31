@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://unpkg.com/vtk.js"></script>
+</head>
+
+  <body>
+    <div id="container"></div>
+      <script type="text/javascript">
+        //Refers to the container div (?)
+        const container = document.querySelector('#container');
+
+        //Creates the VTK renderer and render window. The render window can hold
+        //multiple renderer instances
+        const renderWindow = vtk.Rendering.Core.vtkRenderWindow.newInstance();
+        const renderer = vtk.Rendering.Core.vtkRenderer.newInstance();
+        renderWindow.addRenderer(renderer);
+
+        //WebGL/OpenGL renderer
+        //This creates the openGL renderers that holds and interprets the VTK renderer
+        const openGLRenderWindow = vtk.Rendering.OpenGL.vtkRenderWindow.newInstance();
+        openGLRenderWindow.setContainer(container);
+        openGLRenderWindow.setSize(1000, 1000);
+        renderWindow.addView(openGLRenderWindow);
+
+        //Interactor
+        //Allows the user to interact with the scene
+        const interactor = vtk.Rendering.Core.vtkRenderWindowInteractor.newInstance();
+        interactor.setView(openGLRenderWindow);
+        interactor.initialize();
+        interactor.bindEvents(container);
+        //Set Interactor style
+        const trackball = vtk.Interaction.Style.vtkInteractorStyleTrackballCamera.newInstance();
+        interactor.setInteractorStyle(trackball);
+
+        //Pipeline
+        const cone = vtk.Filters.Sources.vtkConeSource.newInstance();
+        cone.setHeight(4.0);
+        const actorCone = vtk.Rendering.Core.vtkActor.newInstance();
+
+        const sphere = vtk.Filters.Sources.vtkSphereSource.newInstance();
+        //sphere.setHeight(3.0, 0.0, 0.0);
+        const actorSphere = vtk.Rendering.Core.vtkActor.newInstance();
+
+        const mapperSphere = vtk.Rendering.Core.vtkMapper.newInstance();
+        const mapperCone = vtk.Rendering.Core.vtkMapper.newInstance();
+
+
+        actorCone.setMapper(mapperCone);
+        actorSphere.setMapper(mapperSphere);
+        mapperCone.setInputConnection(cone.getOutputPort());
+        mapperSphere.setInputConnection(sphere.getOutputPort());
+        renderer.addActor(actorCone);
+        renderer.addActor(actorSphere);
+
+        //Render
+        renderer.resetCamera();
+        renderWindow.render();
+
+
+      </script>
+  </body>
+</html>
